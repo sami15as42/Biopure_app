@@ -68,8 +68,7 @@ class _AboutPageState extends State<AboutPage> {
                             height: 100,
                             width: 100,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              image: DecorationImage(image: AssetImage('images/pro.png'), fit: BoxFit.cover),
+                              image: DecorationImage(image: AssetImage('images/logo.png')),
                             ),
                           ),
                           SizedBox(height: 20),
