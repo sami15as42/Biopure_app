@@ -30,7 +30,7 @@ class _AboutPageState extends State<AboutPage> {
     );
   }
 
-  String description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation. Lorem ipsum dolor sit amet, consectetur adipiscing elit."; 
+  String description = "Biopure App est une application de passation, de gestion et de suivi des commandes. Elle est destinée principalement aux commerciaux et aux délégués des fournisseurs. C'est une application fluide, intuitive et très simple à utiliser."; 
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -47,7 +47,7 @@ class _AboutPageState extends State<AboutPage> {
                 children: [
                   CostumBar(width, height, context),
                   Padding(
-                    padding: EdgeInsets.fromLTRB(width*0.073, height*0.073, width*0.073, height*0.088),
+                    padding: EdgeInsets.fromLTRB(width*0.073, height*0.05, width*0.073, height*0.05),
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
@@ -65,29 +65,29 @@ class _AboutPageState extends State<AboutPage> {
                         children: <Widget>[
                           SizedBox(height: 20),
                           Container(
-                            height: 100,
-                            width: 100,
+                            height: height*0.15,
+                            width: height*0.15,
                             decoration: BoxDecoration(
                               image: DecorationImage(image: AssetImage('images/logo.png')),
                             ),
                           ),
-                          SizedBox(height: 20),
+                          SizedBox(height: height*0.02),
                           Container(
                             alignment: Alignment.center,
-                            child: Text("Biopure App", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30)),
+                            child: Text("Biopure App", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w800, fontSize: height*0.042)),
                           ),
-                          SizedBox(height: 10),
+                          SizedBox(height: height*0.015),
                           Container(
                             alignment: Alignment.center,
-                            child: Text("Version 1.0", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w400, fontSize: 15)),
+                            child: Text("Version 1.0", textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w400, fontSize: height*0.022)),
                           ),
-                          SizedBox(height: 25),
+                          SizedBox(height: height*0.03),
                           Container(
                             margin: EdgeInsets.symmetric(horizontal: 20),
                             alignment: Alignment.center,
-                            child: Text(description, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                            child: Text(description, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.w600, fontSize: height*0.022)),
                           ),
-                          SizedBox(height: 25),
+                          SizedBox(height: 20),
                         ]
                       ),
                     ),

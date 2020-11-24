@@ -1,6 +1,6 @@
 # biopure_app
 
-A new Flutter project.
+Biopure App est une application de passation, de gestion et de suivi des commandes fournisseurs. Elle est destinée principalement aux commerciaux de la société Biopure (Algérie) et aux délégués des fournisseurs des produits pharmaceutiques. C'est une application fluide, intuitive et très simple à utiliser.
 
 ## Getting Started
 

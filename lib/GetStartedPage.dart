@@ -69,13 +69,13 @@ class GetStartedPageState extends State<GetStartedPage> with TickerProviderState
       color: const Color(0xfff11A0B6),
       imageAssetPath: 'images/getstarted2.png',
       title: 'Passer une commande',
-      body: "Passer des commandes d'une manière facile, flexible et rapide",
+      body: "Permettre aux délégués de passer des commandes d'une manière facile, intuitive et rapide",
       doAnimateImage: true),
     PageModel(
       color: const Color(0xfff157DE6),
       imageAssetPath: 'images/getstarted3.png',
       title: 'Recevoir des notifications',
-      body: 'Rester toujours à jour en recevant des notifications des dernières commandes',
+      body: 'Permettre aux commerciaux de rester toujours à jour en recevant des notifications des dernières commandes',
       doAnimateImage: true),
   ];
 }
