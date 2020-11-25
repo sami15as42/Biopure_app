@@ -87,6 +87,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
             DataRow(cells: [
               DataCell(Text(data[i]["nom_fournisseur"], style: TextStyle(fontSize: height*0.02))), 
               DataCell(Text(data[i]["prenom_fournisseur"], style: TextStyle(fontSize: height*0.02))),
+              DataCell(Text(data[i]["nom_laboratoire"], style: TextStyle(fontSize: height*0.02))),
               DataCell(Text(data[i]["id_commande"], style: TextStyle(fontSize: height*0.02))),
               DataCell(Text(data[i]["id_ligne_commande"], style: TextStyle(fontSize: height*0.02))), 
               DataCell(Text(data[i]["nom_produit"], style: TextStyle(fontSize: height*0.02))),
@@ -115,9 +116,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
     var response = await http.get("http://10.0.2.2/biopure_app/fournisseurs.php");
     var data = json.decode(response.body);
     setState(() {
-      fournisseurs.add(Fournisseur("-1","Tout","",""));
+      fournisseurs.add(Fournisseur("-1","Tout","",null,""));
       for (int i=0;i<data.length;i++) {
-        fournisseurs.add(Fournisseur(data[i]["id_fournisseur"],data[i]["nom_fournisseur"],data[i]["prenom_fournisseur"],data[i]["image"]));
+        fournisseurs.add(Fournisseur(data[i]["id_fournisseur"],data[i]["nom_fournisseur"],data[i]["prenom_fournisseur"],Laboratoire(int.parse(data[i]["id_laboratoire"]),data[i]["nom_laboratoire"]),data[i]["image"]));
       }
     });
     fournisseur = fournisseurs[0].idFournisseur;
@@ -173,21 +174,23 @@ class _StatisticsPageState extends State<StatisticsPage> {
     sheet.getRangeByName('A1').setText("designation_statut");
     sheet.getRangeByName('B1').setText("nom_fournisseur");
     sheet.getRangeByName('C1').setText("prenom_fournisseur");
-    sheet.getRangeByName('D1').setText("id_commande");
-    sheet.getRangeByName('E1').setText("id_ligne_commande");
-    sheet.getRangeByName('F1').setText("nom_produit");
-    sheet.getRangeByName('G1').setText("quantite");
-    sheet.getRangeByName('H1').setText("montant");
+    sheet.getRangeByName('D1').setText("laboratoire");
+    sheet.getRangeByName('E1').setText("id_commande");
+    sheet.getRangeByName('F1').setText("id_ligne_commande");
+    sheet.getRangeByName('G1').setText("nom_produit");
+    sheet.getRangeByName('H1').setText("quantite");
+    sheet.getRangeByName('I1').setText("montant");
     for (int i=2;i<dashboard.length+2;i++) {
       sheet.getRangeByName('A$i').setText(dashboard[i-2]["designation_statut"]);
       if (dashboard[i-2]["nom_fournisseur"]!=null) {
         sheet.getRangeByName('B$i').setText(dashboard[i-2]["nom_fournisseur"]);
         sheet.getRangeByName('C$i').setText(dashboard[i-2]["prenom_fournisseur"]);
-        sheet.getRangeByName('D$i').setNumber(double.parse(dashboard[i-2]["id_commande"]));
-        sheet.getRangeByName('E$i').setNumber(double.parse(dashboard[i-2]["id_ligne_commande"]));
-        sheet.getRangeByName('F$i').setText(dashboard[i-2]["nom_produit"]);
-        sheet.getRangeByName('G$i').setNumber(double.parse(dashboard[i-2]["quantite"]));
-        sheet.getRangeByName('H$i').setNumber(double.parse(dashboard[i-2]["montant"]));
+        sheet.getRangeByName('D$i').setText(dashboard[i-2]["id_laboratoire"]);
+        sheet.getRangeByName('E$i').setNumber(double.parse(dashboard[i-2]["id_commande"]));
+        sheet.getRangeByName('F$i').setNumber(double.parse(dashboard[i-2]["id_ligne_commande"]));
+        sheet.getRangeByName('G$i').setText(dashboard[i-2]["nom_produit"]);
+        sheet.getRangeByName('H$i').setNumber(double.parse(dashboard[i-2]["quantite"]));
+        sheet.getRangeByName('I$i').setNumber(double.parse(dashboard[i-2]["montant"]));
       }
     }
     List<int> bytes = workbook.saveAsStream();
@@ -390,7 +393,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          Text("De", style: TextStyle(fontSize: height*0.02)),
+                                          Text("Du", style: TextStyle(fontSize: height*0.02)),
                                           SizedBox(width: width*0.02),
                                           FlatButton(
                                             padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
@@ -428,6 +431,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                                 columns: [
                                                   DataColumn(label: Text("Nom", style: TextStyle(fontSize: height*0.02))),
                                                   DataColumn(label: Text("Prénom", style: TextStyle(fontSize: height*0.02))),
+                                                  DataColumn(label: Text("Laboratoire", style: TextStyle(fontSize: height*0.02))),
                                                   DataColumn(label: Text("ID commande", style: TextStyle(fontSize: height*0.02)), numeric: true),
                                                   DataColumn(label: Text("ID ligne commande", style: TextStyle(fontSize: height*0.02)), numeric: true),
                                                   DataColumn(label: Text("Produit", style: TextStyle(fontSize: height*0.02))),
@@ -453,6 +457,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                                 columns: [
                                                   DataColumn(label: Text("Nom", style: TextStyle(fontSize: height*0.02))),
                                                   DataColumn(label: Text("Prénom", style: TextStyle(fontSize: height*0.02))),
+                                                  DataColumn(label: Text("Laboratoire", style: TextStyle(fontSize: height*0.02))),
                                                   DataColumn(label: Text("ID commande", style: TextStyle(fontSize: height*0.02)), numeric: true),
                                                   DataColumn(label: Text("ID ligne commande", style: TextStyle(fontSize: height*0.02)), numeric: true),
                                                   DataColumn(label: Text("Produit", style: TextStyle(fontSize: height*0.02))),
@@ -478,6 +483,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                                 columns: [
                                                   DataColumn(label: Text("Nom", style: TextStyle(fontSize: height*0.02))),
                                                   DataColumn(label: Text("Prénom", style: TextStyle(fontSize: height*0.02))),
+                                                  DataColumn(label: Text("Laboratoire", style: TextStyle(fontSize: height*0.02))),
                                                   DataColumn(label: Text("ID commande", style: TextStyle(fontSize: height*0.02)), numeric: true),
                                                   DataColumn(label: Text("ID ligne commande", style: TextStyle(fontSize: height*0.02)), numeric: true),
                                                   DataColumn(label: Text("Produit", style: TextStyle(fontSize: height*0.02))),
@@ -503,6 +509,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                                 columns: [
                                                   DataColumn(label: Text("Nom", style: TextStyle(fontSize: height*0.02))),
                                                   DataColumn(label: Text("Prénom", style: TextStyle(fontSize: height*0.02))),
+                                                  DataColumn(label: Text("Laboratoire", style: TextStyle(fontSize: height*0.02))),
                                                   DataColumn(label: Text("ID commande", style: TextStyle(fontSize: height*0.02)), numeric: true),
                                                   DataColumn(label: Text("ID ligne commande", style: TextStyle(fontSize: height*0.02)), numeric: true),
                                                   DataColumn(label: Text("Produit", style: TextStyle(fontSize: height*0.02))),
@@ -528,6 +535,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                                 columns: [
                                                   DataColumn(label: Text("Nom", style: TextStyle(fontSize: height*0.02))),
                                                   DataColumn(label: Text("Prénom", style: TextStyle(fontSize: height*0.02))),
+                                                  DataColumn(label: Text("Laboratoire", style: TextStyle(fontSize: height*0.02))),
                                                   DataColumn(label: Text("ID commande", style: TextStyle(fontSize: height*0.02)), numeric: true),
                                                   DataColumn(label: Text("ID ligne commande", style: TextStyle(fontSize: height*0.02)), numeric: true),
                                                   DataColumn(label: Text("Produit", style: TextStyle(fontSize: height*0.02))),
@@ -553,6 +561,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                                 columns: [
                                                   DataColumn(label: Text("Nom", style: TextStyle(fontSize: height*0.02))),
                                                   DataColumn(label: Text("Prénom", style: TextStyle(fontSize: height*0.02))),
+                                                  DataColumn(label: Text("Laboratoire", style: TextStyle(fontSize: height*0.02))),
                                                   DataColumn(label: Text("ID commande", style: TextStyle(fontSize: height*0.02)), numeric: true),
                                                   DataColumn(label: Text("ID ligne commande", style: TextStyle(fontSize: height*0.02)), numeric: true),
                                                   DataColumn(label: Text("Produit", style: TextStyle(fontSize: height*0.02))),

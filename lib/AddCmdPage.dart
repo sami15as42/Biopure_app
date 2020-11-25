@@ -32,7 +32,9 @@ class _AddCmdPageState extends State<AddCmdPage> {
   List<Color> couleurs = [Colors.blue[300],Colors.green[300],Colors.yellow[300],Colors.red[300],Colors.orange[300],Colors.deepPurple[300]];
 
   Future getProducts() async {
-    var response = await http.get("http://10.0.2.2/biopure_app/produits.php");
+    var response = await http.post("http://10.0.2.2/biopure_app/produits_fournisseur.php", body: {
+      "id_fournisseur": id
+    });
     var data = json.decode(response.body);
     setState(() {
       for (int i=0;i<data.length;i++) {

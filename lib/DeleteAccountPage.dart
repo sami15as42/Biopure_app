@@ -35,7 +35,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     var data = json.decode(response.body);
     setState(() {
       for (int i=0;i<data.length;i++) {
-        fournisseurs.add(Fournisseur(data[i]["id_fournisseur"],data[i]["nom_fournisseur"],data[i]["prenom_fournisseur"],data[i]["image"]));
+        fournisseurs.add(Fournisseur(data[i]["id_fournisseur"],data[i]["nom_fournisseur"],data[i]["prenom_fournisseur"],null,data[i]["image"]));
       }
     });
     fournisseur = fournisseurs[0].idFournisseur;

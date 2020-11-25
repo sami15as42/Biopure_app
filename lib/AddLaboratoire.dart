@@ -2,50 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'CostumBar.dart';
-import 'Laboratoire.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
-class AddFournisseurPage extends StatefulWidget {
+class AddLaboratoirePage extends StatefulWidget {
   @override
-  _AddFournisseurPageState createState() => _AddFournisseurPageState();
+  _AddLaboratoirePageState createState() => _AddLaboratoirePageState();
 }
 
-class _AddFournisseurPageState extends State<AddFournisseurPage> {
+class _AddLaboratoirePageState extends State<AddLaboratoirePage> {
 
   TextEditingController controllerID = new TextEditingController();
   TextEditingController controllerNom = new TextEditingController();
-  TextEditingController controllerPrenom = new TextEditingController();
-  TextEditingController controllerPW = new TextEditingController();
-  String laboratoire;
-  List<Laboratoire> laboratoires = List();
+  TextEditingController controllerAdresse = new TextEditingController();
+  TextEditingController controllerTelNum = new TextEditingController();
 
-  Future addFournisseur() async {
-    await http.post("http://10.0.2.2/biopure_app/add_fournisseur.php", body: {
-      "id_fournisseur": controllerID.text,
-      "nom_fournisseur": controllerNom.text,
-      "prenom_fournisseur": controllerPrenom.text,
-      "mot_passe_fournisseur": controllerPW.text,
-      "id_laboratoire": laboratoire
+  Future addLaboratoire() async {
+    await http.post("http://10.0.2.2/biopure_app/add_laboratoire.php", body: {
+      "id_laboratoire": controllerID.text,
+      "nom_laboratoire": controllerNom.text,
+      "adresse_laboratoire": controllerAdresse.text,
+      "numéro_téléphone_laboratoire": controllerTelNum.text
     });
     setState(() {
       controllerID.text = "";
       controllerNom.text = "";
-      controllerPrenom.text = "";
-      controllerPW.text = "";
+      controllerAdresse.text = "";
+      controllerTelNum.text = "";
     });
-  }
-
-  Future getLaboratoires() async {
-    var response = await http.get("http://10.0.2.2/biopure_app/laboratoires.php");
-    var data = json.decode(response.body);
-    setState(() {
-      laboratoires.add(Laboratoire(-1,"Tout"));
-      for (int i=0;i<data.length;i++) {
-        laboratoires.add(Laboratoire(int.parse(data[i]["id_laboratoire"]),data[i]["nom_laboratoire"]));
-      }
-    });
-    laboratoire = laboratoires[0].idLaboratoire.toString();
   }
 
   Future<bool> _onBackPressed() {
@@ -96,7 +79,7 @@ class _AddFournisseurPageState extends State<AddFournisseurPage> {
                         Row(
                           children: <Widget>[
                             const Spacer(),
-                            Text('Ajouter un fournisseur', style: TextStyle(fontSize: height*0.03)),
+                            Text('Ajouter un laboratoire', style: TextStyle(fontSize: height*0.03)),
                             const Spacer(),
                           ],
                         ),
@@ -120,20 +103,22 @@ class _AddFournisseurPageState extends State<AddFournisseurPage> {
                                 Row(children: <Widget>[
                                   Padding(
                                     padding: EdgeInsets.only(top: 20, left: 40),
-                                    child: Text('ID fournisseur', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
+                                    child: Text('ID laboratoire', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
                                 ]),
                                 Padding(
                                   padding: EdgeInsets.only(left: 16, right: 16, top: 5),
                                     child: TextFormField(
                                       style: TextStyle(fontSize: height*0.023),
                                       controller: controllerID,
+                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                      keyboardType: TextInputType.number,
                                       decoration: InputDecoration(filled: true, fillColor: Colors.grey[200]),
                                     ),
                                 ),
                                 Row(children: <Widget>[
                                   Padding(
                                     padding: EdgeInsets.only(top: 20, left: 40),
-                                    child: Text('Nom fournisseur', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
+                                    child: Text('Nom laboratoire', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
                                 ]),
                                 Padding(
                                   padding: EdgeInsets.only(left: 16, right: 16, top: 5),
@@ -146,66 +131,36 @@ class _AddFournisseurPageState extends State<AddFournisseurPage> {
                                 Row(children: <Widget>[
                                   Padding(
                                     padding: EdgeInsets.only(top: 20, left: 40),
-                                    child: Text('Prénom fournisseur', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
+                                    child: Text('Adresse laboratoire', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
                                 ]),
                                 Padding(
                                   padding: EdgeInsets.only(left: 16, right: 16, top: 5),
                                     child: TextFormField(
                                       style: TextStyle(fontSize: height*0.023),
-                                      controller: controllerPrenom,
+                                      controller: controllerAdresse,
                                       decoration: InputDecoration(filled: true, fillColor: Colors.grey[200]),
                                     ),
                                 ),
                                 Row(children: <Widget>[
                                   Padding(
                                     padding: EdgeInsets.only(top: 20, left: 40),
-                                    child: Text('Mot de passe', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
+                                    child: Text('Numéro téléphone laboratoire', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
                                 ]),
                                 Padding(
                                   padding: EdgeInsets.only(left: 16, right: 16, top: 5),
                                     child: TextFormField(
                                       style: TextStyle(fontSize: height*0.023),
-                                      controller: controllerPW,
-                                      obscureText: true,
+                                      controller: controllerTelNum,
+                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                      keyboardType: TextInputType.number,
                                       decoration: InputDecoration(filled: true, fillColor: Colors.grey[200]),
                                     ),
-                                ),
-                                Column(
-                                  children: <Widget>[
-                                    Padding(padding: EdgeInsets.only(top: 20), child: Text('Laboratoire', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
-                                    Padding(
-                                      padding: EdgeInsets.only(top: 5),
-                                      child: StatefulBuilder(
-                                        builder: (BuildContext context, StateSetter setState) {
-                                          return DropdownButton<String>(
-                                            value: laboratoire,
-                                            icon: Icon(Icons.keyboard_arrow_down),
-                                            iconSize: 24,
-                                            elevation: 16,
-                                            underline: Container(height: 1, color: Colors.grey,),
-                                            onChanged: (String newValue) {
-                                              setState(() {
-                                                laboratoire = newValue;
-                                              });
-                                            },
-                                            items: laboratoires
-                                                .map<DropdownMenuItem<String>>((Laboratoire value) {
-                                              return DropdownMenuItem<String>(
-                                                value: value.idLaboratoire.toString(),
-                                                child: Text(value.nomLaboratoire, style: TextStyle(fontSize: height*0.025)),
-                                              );
-                                            }).toList(),
-                                          );
-                                        }
-                                      )
-                                    ),
-                                  ]
                                 ),
                                 SizedBox(height: height*0.02),
                                 CupertinoButton(child: Icon(Icons.add, color: Colors.white, size: height*0.03), padding: EdgeInsets.fromLTRB(8, 8, 8, 8), pressedOpacity: 0.7, borderRadius: BorderRadius.circular(50), color: Colors.blue, 
                                   onPressed: () {
-                                    if (controllerID.text.isNotEmpty & controllerPW.text.isNotEmpty & controllerNom.text.isNotEmpty & controllerPrenom.text.isNotEmpty)
-                                      addFournisseur();
+                                    if (controllerID.text.isNotEmpty & controllerTelNum.text.isNotEmpty & controllerNom.text.isNotEmpty & controllerAdresse.text.isNotEmpty)
+                                      addLaboratoire();
                                   }
                                 ),
                                 SizedBox(height: height*0.02),

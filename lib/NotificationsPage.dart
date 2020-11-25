@@ -12,6 +12,10 @@ import 'Motif.dart';
 import 'main.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_mailer/flutter_mailer.dart';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart' as excel;
 
 class NotificationsPage extends StatefulWidget {
   @override
@@ -36,6 +40,38 @@ class _NotificationsPageState extends State<NotificationsPage> {
   String laboratoire;
   List<Laboratoire> laboratoires = List();
   bool showAll = false;
+  DateTime dateStart = DateTime(2020,11,1);
+  DateTime dateEnd = DateTime.now();
+
+  Future<Null> selectTimePickerStart(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+      context: context, 
+      initialDate: dateStart, 
+      firstDate: DateTime(2010), 
+      lastDate: DateTime(2040)
+    );
+    if (picked!=null && picked!=dateStart) {
+      setState(() {
+        dateStart = picked;
+        getCommandes();
+      });
+    }
+  }
+
+  Future<Null> selectTimePickerEnd(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+      context: context, 
+      initialDate: dateEnd, 
+      firstDate: DateTime(2010), 
+      lastDate: DateTime(2040)
+    );
+    if (picked!=null && picked!=dateEnd) {
+      setState(() {
+        dateEnd = picked;
+        getCommandes();
+      });
+    }
+  }
 
   Future editCmd(Commande commande,index,action) async {
     if (action==1) {
@@ -104,9 +140,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
     nbNotifications = int.parse(data[0]['nb']);
     response = await http.post("http://10.0.2.2/biopure_app/notifications.php", body: {
       'id_fournisseur': fournisseur == null ? "-1" : fournisseur,
-      'id_produit': produit == null ? "-1" : produit,
       'id_laboratoire': laboratoire == null ? "-1" : laboratoire,
       "code_site": codeSite,
+      'date_start': dateStart.year.toString() + "-" + dateStart.month.toString() + "-" + dateStart.day.toString(),
+      'date_end': dateEnd.year.toString() + "-" + dateEnd.month.toString() + "-" + dateEnd.day.toString()
     });
     data = json.decode(response.body);
     setState(() {
@@ -117,7 +154,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         if (data[i]["id_commande"]!=idCommande.toString()) {
           idCommande = int.parse(data[i]["id_commande"]);
           lignesCommandes = new List();
-          allNotifications.add(Commande(idCommande,int.parse(data[i]["id_pharmacie"]),data[i]["date_commande"],Fournisseur(data[i]["id_fournisseur"],data[i]["nom_fournisseur"],data[i]["prenom_fournisseur"],data[i]["image"]),double.parse(data[i]["montant_commande"]),lignesCommandes));
+          allNotifications.add(Commande(idCommande,int.parse(data[i]["id_pharmacie"]),data[i]["date_commande"],Fournisseur(data[i]["id_fournisseur"],data[i]["nom_fournisseur"],data[i]["prenom_fournisseur"],Laboratoire(int.parse(data[i]["id_laboratoire"]),data[i]["nom_laboratoire"]),data[i]["image"]),double.parse(data[i]["montant_commande"]),lignesCommandes));
           lignesCommandes.add(LigneCommande(int.parse(data[i]["id_ligne_commande"]),Produit(int.parse(data[i]["id_produit"]), data[i]["nom_produit"], double.parse(data[i]["prix_produit"]),Laboratoire(int.parse(data[i]["id_laboratoire"]),data[i]["nom_laboratoire"])),int.parse(data[i]["quantite"]),Statut(int.parse(data[i]["id_statut"]),data[i]["designation_statut"]),Motif(int.parse(data[i]["id_motif"]),data[i]["designation_motif"])));
         }
         else {
@@ -140,25 +177,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
     return false;
   }
 
-  Future getProducts() async {
-    var response = await http.get("http://10.0.2.2/biopure_app/produits.php");
-    var data = json.decode(response.body);
-    setState(() {
-      produits.add(Produit(-1,"Tout",0.0,null));
-      for (int i=0;i<data.length;i++) {
-        produits.add(Produit(int.parse(data[i]["id_produit"]),data[i]["nom_produit"],double.parse(data[i]["prix_produit"]),Laboratoire(int.parse(data[i]["id_laboratoire"]),data[i]["nom_laboratoire"])));
-      }
-    });
-    produit = produits[0].idProduit.toString();
-  }
-
   Future getFournisseurs() async {
     var response = await http.get("http://10.0.2.2/biopure_app/fournisseurs.php");
     var data = json.decode(response.body);
     setState(() {
-      fournisseurs.add(Fournisseur("-1","Tout","",""));
+      fournisseurs.add(Fournisseur("-1","Tout","",null,""));
       for (int i=0;i<data.length;i++) {
-        fournisseurs.add(Fournisseur(data[i]["id_fournisseur"],data[i]["nom_fournisseur"],data[i]["prenom_fournisseur"],data[i]["image"]));
+        fournisseurs.add(Fournisseur(data[i]["id_fournisseur"],data[i]["nom_fournisseur"],data[i]["prenom_fournisseur"],null,data[i]["image"]));
       }
     });
     fournisseur = fournisseurs[0].idFournisseur;
@@ -174,6 +199,53 @@ class _NotificationsPageState extends State<NotificationsPage> {
       }
     });
     laboratoire = laboratoires[0].idLaboratoire.toString();
+  }
+
+  Future sendFile(fileName, addressMail) async {
+    var response = await http.post("http://10.0.2.2/biopure_app/notifications_sans_détails.php", body: {
+      'id_fournisseur': fournisseur == null ? "-1" : fournisseur,
+      'id_laboratoire': laboratoire == null ? "-1" : laboratoire,
+      "code_site": codeSite,
+      'date_start': dateStart.year.toString() + "-" + dateStart.month.toString() + "-" + dateStart.day.toString(),
+      'date_end': dateEnd.year.toString() + "-" + dateEnd.month.toString() + "-" + dateEnd.day.toString()
+    });
+    var dashboard = json.decode(response.body);
+    fileName = fileName + ".xlsx";
+    Directory appDocDir = await getApplicationDocumentsDirectory();
+    String path = appDocDir.path;
+    final excel.Workbook workbook = new excel.Workbook();
+    final excel.Worksheet sheet = workbook.worksheets[0];
+    sheet.getRangeByName('A1').setText("id_commande");
+    sheet.getRangeByName('B1').setText("date_commande");
+    sheet.getRangeByName('C1').setText("id_fournisseur");
+    sheet.getRangeByName('D1').setText("nom_fournisseur");
+    sheet.getRangeByName('E1').setText("prenom_fournisseur");
+    sheet.getRangeByName('F1').setText("nom_laboratoire");
+    sheet.getRangeByName('G1').setText("id_pharmacie");
+    sheet.getRangeByName('H1').setText("nom_pharmacie");
+    sheet.getRangeByName('I1').setText("montant_commande");
+    for (int i=2;i<dashboard.length+2;i++) {
+      sheet.getRangeByName('A$i').setText(dashboard[i-2]["id_commande"]);
+      sheet.getRangeByName('B$i').setDateTime(DateTime(int.parse(dashboard[i-2]["date_commande"].substring(0,4)),int.parse(dashboard[i-2]["date_commande"].substring(5,7)),int.parse(dashboard[i-2]["date_commande"].substring(8))));
+      sheet.getRangeByName('C$i').setText(dashboard[i-2]["id_fournisseur"]);
+      sheet.getRangeByName('D$i').setText(dashboard[i-2]["nom_fournisseur"]);
+      sheet.getRangeByName('E$i').setText(dashboard[i-2]["prenom_fournisseur"]);
+      sheet.getRangeByName('F$i').setText(dashboard[i-2]["nom_laboratoire"]);
+      sheet.getRangeByName('G$i').setText(dashboard[i-2]["id_pharmacie"]);
+      sheet.getRangeByName('H$i').setText(dashboard[i-2]["nom_pharmacie"]);
+      sheet.getRangeByName('I$i').setNumber(double.parse(dashboard[i-2]["montant_commande"]));
+    }
+    List<int> bytes = workbook.saveAsStream();
+    File('$path/$fileName').writeAsBytes(bytes);
+    workbook.dispose();
+    final MailOptions mailOptions = MailOptions(
+      body: "Voici ci-joint le fichier excel : " + fileName + ". (envoyé par Biopure App)",
+      subject: "Envoie du fichier excel : " + fileName,
+      recipients: [addressMail],
+      isHTML: true,
+      attachments: ['$path/$fileName'],
+    );
+    await FlutterMailer.send(mailOptions);
   }
 
   Future<bool> _onBackPressed() {
@@ -202,7 +274,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
     getCommandes();
     getStatuts();
     getMotifs();
-    getProducts();
     getFournisseurs();
     getLaboratoires();
   }
@@ -240,40 +311,38 @@ class _NotificationsPageState extends State<NotificationsPage> {
                       ),
                       child: Column(
                         children: <Widget>[
-                          Column(
-                            children: <Widget>[
-                              Padding(padding: EdgeInsets.only(top: 20), child: Text('Produit', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
-                              Padding(
-                                padding: EdgeInsets.only(top: 5),
-                                child: StatefulBuilder(
-                                  builder: (BuildContext context, StateSetter setState) {
-                                    return DropdownButton<String>(
-                                      value: produit,
-                                      icon: Icon(Icons.keyboard_arrow_down),
-                                      iconSize: 24,
-                                      elevation: 16,
-                                      underline: Container(height: 1, color: Colors.grey,),
-                                      onChanged: (String newValue) {
-                                        setState(() {
-                                          produit = newValue;
-                                        });
-                                      },
-                                      items: produits
-                                          .map<DropdownMenuItem<String>>((Produit value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value.idProduit.toString(),
-                                          child: Text(value.nomProduit, style: TextStyle(fontSize: height*0.025)),
-                                        );
-                                      }).toList(),
-                                    );
-                                  }
-                                )
+                          SizedBox(height: height*0.02),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text("Du", style: TextStyle(fontSize: height*0.02)),
+                              SizedBox(width: width*0.02),
+                              FlatButton(
+                                padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
+                                color: Colors.blue,
+                                textColor: Colors.white,
+                                child: Text(dateStart.day.toString() + "-" + dateStart.month.toString() + "-" + dateStart.year.toString(), style: TextStyle(fontSize: height*0.02)),
+                                onPressed: () {
+                                  selectTimePickerStart(context);
+                                }, 
                               ),
-                            ]
+                              SizedBox(width: width*0.02),
+                              Text("à", style: TextStyle(fontSize: height*0.02)),
+                              SizedBox(width: width*0.02),
+                              FlatButton(
+                                padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
+                                color: Colors.blue,
+                                textColor: Colors.white,
+                                child: Text(dateEnd.day.toString() + "-" + dateEnd.month.toString() + "-" + dateEnd.year.toString(), style: TextStyle(fontSize: height*0.02)),
+                                onPressed: () {
+                                  selectTimePickerEnd(context);
+                                }, 
+                              ),    
+                            ],
                           ),
                           Column(
                             children: <Widget>[
-                              Padding(padding: EdgeInsets.only(top: 20), child: Text('Fournisseur', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
+                              Padding(padding: EdgeInsets.only(top: 10), child: Text('Fournisseur', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
                               Padding(
                                 padding: EdgeInsets.only(top: 5),
                                 child: StatefulBuilder(
@@ -354,6 +423,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   }
                                 ),
                               ),
+                              SizedBox(width: width*0.1),
+                              Padding(
+                                padding: EdgeInsets.only(top: 25),
+                                child: CupertinoButton(child: Text("Exporter", style: TextStyle(color: Colors.white, fontSize: height*0.025)), padding: EdgeInsets.fromLTRB(8, 8, 8, 8), pressedOpacity: 0.7, borderRadius: BorderRadius.circular(10), color: Colors.blue, 
+                                  onPressed: () {
+                                    showEmailSendingDialog();
+                                  }
+                                ),
+                              ),
                             ],
                           ),
                           SizedBox(height: height*0.015),
@@ -423,8 +501,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                                         Text(notifications[index].date, style: TextStyle(color:Colors.grey, fontSize: height*0.015)),
                                                       ]
                                                     ),
+                                                    Text("Laboratoire : " + notifications[index].fournisseur.laboratoire.nomLaboratoire, style: TextStyle(color:Colors.black, fontSize: height*0.02)),
                                                     Text("ID commande : " + notifications[index].idCommande.toString(), style: TextStyle(color:Colors.black, fontSize: height*0.02)),
-                                                    Text("ID pharmacie : " + notifications[index].idPharmacie.toString(), style: TextStyle(color:Colors.black, fontSize: height*0.02)),
                                                     Text("Montant : " + notifications[index].montant.toString(), style: TextStyle(color:Colors.black, fontSize: height*0.02)),
                                                   ] 
                                                 ),
@@ -609,8 +687,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 showEditDialog(commande,i);
             }),
             DataCell(Text(commande.lignesCommandes[i].idLigneCommande.toString(), style: TextStyle(fontSize: height*0.02))), 
-            DataCell(Text(commande.lignesCommandes[i].produit.nomProduit, style: TextStyle(fontSize: height*0.02))),
-            DataCell(Text(commande.lignesCommandes[i].produit.laboratoire.nomLaboratoire, style: TextStyle(fontSize: height*0.02))), 
+            DataCell(Text(commande.lignesCommandes[i].produit.nomProduit, style: TextStyle(fontSize: height*0.02))), 
             DataCell(Text(commande.lignesCommandes[i].produit.prixProduit.toString(), style: TextStyle(fontSize: height*0.02))), 
             DataCell(Text(commande.lignesCommandes[i].quantite.toString(), style: TextStyle(fontSize: height*0.02))), 
             DataCell(Text(commande.lignesCommandes[i].statut.designation, style: TextStyle(fontSize: height*0.02))), 
@@ -623,7 +700,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
             DataCell(Icon(Icons.edit_off, color: Colors.grey, size: height*0.03), onTap: () {}),
             DataCell(Text(commande.lignesCommandes[i].idLigneCommande.toString(), style: TextStyle(fontSize: height*0.02))), 
             DataCell(Text(commande.lignesCommandes[i].produit.nomProduit, style: TextStyle(fontSize: height*0.02))),
-            DataCell(Text(commande.lignesCommandes[i].produit.laboratoire.nomLaboratoire, style: TextStyle(fontSize: height*0.02))), 
             DataCell(Text(commande.lignesCommandes[i].produit.prixProduit.toString(), style: TextStyle(fontSize: height*0.02))), 
             DataCell(Text(commande.lignesCommandes[i].quantite.toString(), style: TextStyle(fontSize: height*0.02))), 
             DataCell(Text(commande.lignesCommandes[i].statut.designation, style: TextStyle(fontSize: height*0.02))), 
@@ -668,6 +744,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                     Icon(Icons.calendar_today, color: Colors.blue, size: height*0.025),
                                   ],
                                 ),
+                                Text("Laboratoire : " + commande.fournisseur.laboratoire.nomLaboratoire, style: TextStyle(color: Colors.black, fontSize: height*0.02),),
                                 Text("ID pharmacie : " + commande.idPharmacie.toString(), style: TextStyle(color: Colors.black, fontSize: height*0.02),),
                                 Row(
                                   children: <Widget>[
@@ -698,7 +775,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           DataColumn(label: Text("Edit", style: TextStyle(fontSize: height*0.02))),
                           DataColumn(label: Text("ID", style: TextStyle(fontSize: height*0.02)), numeric: true),
                           DataColumn(label: Text("Produit", style: TextStyle(fontSize: height*0.02))),
-                          DataColumn(label: Text("Laboratoire", style: TextStyle(fontSize: height*0.02))),
                           DataColumn(label: Text("Prix", style: TextStyle(fontSize: height*0.02)), numeric: true),
                           DataColumn(label: Text("Quantité", style: TextStyle(fontSize: height*0.02)), numeric: true),
                           DataColumn(label: Text("Statut", style: TextStyle(fontSize: height*0.02))),
@@ -712,6 +788,66 @@ class _NotificationsPageState extends State<NotificationsPage> {
               )
             ),
           ),
+        );
+      }
+    );
+  }
+
+  showEmailSendingDialog() {
+    TextEditingController controllerAddressMail = new TextEditingController();
+    TextEditingController controllerFileName = new TextEditingController();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        Color couleur = Colors.blue[400];
+        double height = MediaQuery.of(context).size.height;
+        return new AlertDialog(
+          insetPadding: EdgeInsets.symmetric(vertical: height*0.18),
+          scrollable: true,
+          content: Column(
+            children: <Widget>[
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: Text('Adresse mail du récepteur', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 16, right: 16, top: 5),
+                child: TextFormField(
+                  style: TextStyle(fontSize: height*0.025),
+                  controller: controllerAddressMail,
+                  decoration: InputDecoration(filled: true, fillColor: Colors.grey[200]),
+                ),
+              ),
+              SizedBox(height: 10),
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 10),
+                  child: Text('Nom du fichier excel', style: TextStyle(fontSize: height*0.02, color: Colors.grey[500])),),
+              ),
+              Padding(
+                padding: EdgeInsets.only(left: 16, right: 16, top: 5),
+                child: TextFormField(
+                  style: TextStyle(fontSize: height*0.025),
+                  controller: controllerFileName,
+                  decoration: InputDecoration(filled: true, fillColor: Colors.grey[200]),
+                ),
+              ),
+              SizedBox(height: 10),
+              StatefulBuilder(
+                builder: (BuildContext context, StateSetter setState) {
+                  return CupertinoButton(child: Text("Envoyer", style: TextStyle(fontSize: height*0.025)), padding: EdgeInsets.fromLTRB(50, 10, 50, 10), pressedOpacity: 0.7, borderRadius: BorderRadius.circular(10), color: couleur, 
+                    onPressed: () {
+                      if (controllerFileName.text.isNotEmpty & controllerAddressMail.text.isNotEmpty) {
+                        sendFile(controllerFileName.text, controllerAddressMail.text);
+                        Navigator.pop(context);
+                      }
+                    }
+                  );
+                }
+              ),
+            ]
+          )
         );
       }
     );

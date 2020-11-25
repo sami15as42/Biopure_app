@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'AddFournisseurPage.dart';
 import 'AboutPage.dart';
 import 'AddAgentPage.dart';
+import 'AddLaboratoire.dart';
 import 'main.dart';
 import 'ChangeDroitAccesPage.dart';
 import 'DeleteAccountPage.dart';
@@ -138,7 +139,6 @@ class MenuPageAdminState extends State<MenuPageAdmin> {
             Expanded(
               child: ListView(
                 children: [
-                  SizedBox(height: height*0.02),
                   ListTile(
                     leading: Icon(Icons.add_circle_outline, size: height*0.04),
                     title: Text("Ajouter un fournisseur", style: TextStyle(fontSize: height*0.025)),
@@ -147,7 +147,6 @@ class MenuPageAdminState extends State<MenuPageAdmin> {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => AddFournisseurPage()));
                     }
                   ),
-                  SizedBox(height: height*0.02),
                   ListTile(
                     leading: Icon(Icons.add_circle_outline, size: height*0.04),
                     title: Text("Ajouter un commercial", style: TextStyle(fontSize: height*0.025)),
@@ -156,7 +155,14 @@ class MenuPageAdminState extends State<MenuPageAdmin> {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => AddAgentPage()));
                     }
                   ),
-                  SizedBox(height: height*0.02),
+                  ListTile(
+                    leading: Icon(Icons.add_circle_outline, size: height*0.04),
+                    title: Text("Ajouter un laboratoire", style: TextStyle(fontSize: height*0.025)),
+                    onTap: () {
+                      print("Ajouter un laboratoire");
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => AddLaboratoirePage()));
+                    }
+                  ),
                   ListTile(
                     leading: Icon(Icons.delete, size: height*0.04),
                     title: Text("Supprimer un compte", style: TextStyle(fontSize: height*0.025)),
@@ -165,7 +171,6 @@ class MenuPageAdminState extends State<MenuPageAdmin> {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => DeleteAccountPage()));
                     }
                   ),
-                  SizedBox(height: height*0.02),
                   ListTile(
                     leading: Icon(Icons.edit, size: height*0.04),
                     title: Text("Modifier droit d'accès d'un commercial", style: TextStyle(fontSize: height*0.025)),
@@ -174,7 +179,6 @@ class MenuPageAdminState extends State<MenuPageAdmin> {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => ChangeDroitAccesPage()));
                     }
                   ),
-                  SizedBox(height: height*0.02),
                   ListTile(
                     leading: Icon(Icons.add_box, size: height*0.04),
                     title: Text("Ajouter un statut", style: TextStyle(fontSize: height*0.025)),
@@ -183,7 +187,6 @@ class MenuPageAdminState extends State<MenuPageAdmin> {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => AddStatutPage()));
                     }
                   ),
-                  SizedBox(height: height*0.02),
                   ListTile(
                     leading: Icon(Icons.add_box, size: height*0.04),
                     title: Text("Ajouter un motif", style: TextStyle(fontSize: height*0.025)),
@@ -192,7 +195,6 @@ class MenuPageAdminState extends State<MenuPageAdmin> {
                       Navigator.push(context, MaterialPageRoute(builder: (context) => AddMotifPage()));
                     }
                   ),
-                  SizedBox(height: height*0.02),
                   ListTile(
                     leading: Icon(Icons.info_outline, size: height*0.04),
                     title: Text("A propos", style: TextStyle(fontSize: height*0.025)),
