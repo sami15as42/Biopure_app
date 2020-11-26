@@ -7,6 +7,7 @@ import 'Produit.dart';
 import 'Laboratoire.dart';
 import 'LigneCommande.dart';
 import 'Fournisseur.dart';
+import 'Pharmacie.dart';
 import 'Statut.dart';
 import 'Motif.dart';
 import 'main.dart';
@@ -154,7 +155,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
         if (data[i]["id_commande"]!=idCommande.toString()) {
           idCommande = int.parse(data[i]["id_commande"]);
           lignesCommandes = new List();
-          allNotifications.add(Commande(idCommande,int.parse(data[i]["id_pharmacie"]),data[i]["date_commande"],Fournisseur(data[i]["id_fournisseur"],data[i]["nom_fournisseur"],data[i]["prenom_fournisseur"],Laboratoire(int.parse(data[i]["id_laboratoire"]),data[i]["nom_laboratoire"]),data[i]["image"]),double.parse(data[i]["montant_commande"]),lignesCommandes));
+          allNotifications.add(Commande(idCommande,Pharmacie(int.parse(data[i]["id_pharmacie"]),data[i]["nom_pharmacie"],data[i]["adresse_pharmacie"],data[i]["numéro_téléphone_pharmacie"]),data[i]["date_commande"],Fournisseur(data[i]["id_fournisseur"],data[i]["nom_fournisseur"],data[i]["prenom_fournisseur"],Laboratoire(int.parse(data[i]["id_laboratoire"]),data[i]["nom_laboratoire"]),data[i]["image"]),double.parse(data[i]["montant_commande"]),lignesCommandes));
           lignesCommandes.add(LigneCommande(int.parse(data[i]["id_ligne_commande"]),Produit(int.parse(data[i]["id_produit"]), data[i]["nom_produit"], double.parse(data[i]["prix_produit"]),Laboratoire(int.parse(data[i]["id_laboratoire"]),data[i]["nom_laboratoire"])),int.parse(data[i]["quantite"]),Statut(int.parse(data[i]["id_statut"]),data[i]["designation_statut"]),Motif(int.parse(data[i]["id_motif"]),data[i]["designation_motif"])));
         }
         else {
@@ -531,6 +532,51 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
   
+  showInfoPharmacieDialog(Pharmacie pharmacie) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        double height = MediaQuery.of(context).size.height;
+        return new AlertDialog(
+          title: Text("Informations sur la pharmacie", style: TextStyle(fontSize: height*0.03)),
+          insetPadding: EdgeInsets.symmetric(vertical: height*0.35),
+          content: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  children: [
+                    Text("ID pharmacie : ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: height*0.023)),
+                    Text(pharmacie.idPharmacie.toString(), style: TextStyle(fontSize: height*0.023)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text("Nom de la pharmacie : ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: height*0.023)),
+                    Text(pharmacie.nomPharmacie, style: TextStyle(fontSize: height*0.023)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text("Adresse de la pharmacie : ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: height*0.023)),
+                    Text(pharmacie.adressePharmacie, style: TextStyle(fontSize: height*0.023)),
+                  ],
+                ),
+                Row(
+                  children: [
+                    Text("Numéro Tel. de la pharmacie : ", style: TextStyle(fontWeight: FontWeight.bold, fontSize: height*0.023)),
+                    Text(pharmacie.numeroTelPharmacie, style: TextStyle(fontSize: height*0.023)),
+                  ],
+                ),
+              ]
+            ),
+          ),
+        );
+      }
+    );
+  }
+
   showEditDialog(commande,index) {
     showDialog(
       context: context,
@@ -732,24 +778,35 @@ class _NotificationsPageState extends State<NotificationsPage> {
                           flex: 2,
                           child: Padding(
                             padding: const EdgeInsets.all(10.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Row(
-                                  children: <Widget>[
+                            child: Row(
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Text("ID commande : " + commande.idCommande.toString(), style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: height*0.025),),
-                                    Spacer(),
-                                    Text(commande.date, style: TextStyle(color: Colors.black, fontSize: height*0.02),),
-                                    SizedBox(width: 5),
-                                    Icon(Icons.calendar_today, color: Colors.blue, size: height*0.025),
+                                    SizedBox(height: height*0.02),
+                                    Text("Laboratoire : " + commande.fournisseur.laboratoire.nomLaboratoire, style: TextStyle(color: Colors.black, fontSize: height*0.02),),
+                                    SizedBox(height: height*0.02),
+                                    Text("Montant total : " + commande.montant.toString(), style: TextStyle(color: Colors.black, fontSize: height*0.02),),
                                   ],
                                 ),
-                                Text("Laboratoire : " + commande.fournisseur.laboratoire.nomLaboratoire, style: TextStyle(color: Colors.black, fontSize: height*0.02),),
-                                Text("ID pharmacie : " + commande.idPharmacie.toString(), style: TextStyle(color: Colors.black, fontSize: height*0.02),),
-                                Row(
-                                  children: <Widget>[
-                                    Text("Montant total : " + commande.montant.toString(), style: TextStyle(color: Colors.black, fontSize: height*0.02),),  
-                                    Spacer(),
+                                Spacer(),
+                                Column(
+                                  children: [
+                                    Row(
+                                      children: <Widget>[
+                                        Text(commande.date, style: TextStyle(color: Colors.black, fontSize: height*0.02),),
+                                        SizedBox(width: 5),
+                                        Icon(Icons.calendar_today, color: Colors.blue, size: height*0.025),
+                                      ],
+                                    ),
+                                    SizedBox(height: height*0.01),
+                                    CupertinoButton(child: Text("ID pharmacie : " + commande.pharmacie.idPharmacie.toString(), style: TextStyle(color: Colors.white, fontSize: height*0.023),), padding: EdgeInsets.fromLTRB(3, 0, 3, 0), pressedOpacity: 0.7, color: Colors.blue, 
+                                      onPressed: () {
+                                        showInfoPharmacieDialog(commande.pharmacie);
+                                      }
+                                    ),
+                                    SizedBox(height: height*0.01),
                                     CupertinoButton(child: Icon(Icons.list_alt, color: Colors.white, size: height*0.035), padding: EdgeInsets.fromLTRB(8, 8, 8, 8), pressedOpacity: 0.7, borderRadius: BorderRadius.circular(50), color: Colors.blue, 
                                       onPressed: () {
                                         Navigator.pop(context);
@@ -762,12 +819,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               ],
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
-                    SizedBox(height: height*0.01),
                     Text("Contenu :", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: height*0.025),),
-                    SizedBox(height: height*0.02),
+                    SizedBox(height: height*0.01),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: DataTable(

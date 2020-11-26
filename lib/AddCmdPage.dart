@@ -50,7 +50,7 @@ class _AddCmdPageState extends State<AddCmdPage> {
     var data = json.decode(response.body);
     setState(() {
       for (int i=0;i<data.length;i++) {
-        pharmacies.add(Pharmacie(int.parse(data[i]["id_pharmacie"]),data[i]["nom_pharmacie"]));
+        pharmacies.add(Pharmacie(int.parse(data[i]["id_pharmacie"]),data[i]["nom_pharmacie"],data[i]["adresse_pharmacie"],data[i]["numéro_téléphone_pharmacie"]));
       }
     });
     pharmacie = pharmacies[0].idPharmacie.toString();

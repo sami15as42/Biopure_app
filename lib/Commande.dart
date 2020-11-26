@@ -1,19 +1,20 @@
 import 'LigneCommande.dart';
 import 'Fournisseur.dart';
+import 'Pharmacie.dart';
 
 class Commande
 {
   int idCommande;
-  int idPharmacie;
+  Pharmacie pharmacie;
   String date;
   Fournisseur fournisseur;
   double montant;
   List<LigneCommande> lignesCommandes;  
 
-  Commande(idCommande, idPharmacie, date, fournisseur, montant, lignesCommandes)
+  Commande(idCommande, pharmacie, date, fournisseur, montant, lignesCommandes)
   {
     this.idCommande = idCommande;
-    this.idPharmacie = idPharmacie;
+    this.pharmacie = pharmacie;
     this.date = date;
     this.fournisseur = fournisseur;
     this.montant = montant;

@@ -40,7 +40,7 @@ class _HistoriqueCmdPageState extends State<HistoriqueCmdPage> {
         if (data[i]["id_commande"]!=idCommande.toString()) {
           idCommande = int.parse(data[i]["id_commande"]);
           lignesCommandes = new List();
-          commandes.add(Commande(idCommande,int.parse(pharmacie),data[i]["date_commande"],Fournisseur(id,"","",null,""),double.parse(data[i]["montant_commande"]),lignesCommandes));
+          commandes.add(Commande(idCommande,Pharmacie(int.parse(pharmacie),"","",""),data[i]["date_commande"],Fournisseur(id,"","",null,""),double.parse(data[i]["montant_commande"]),lignesCommandes));
           lignesCommandes.add(LigneCommande(int.parse(data[i]["id_ligne_commande"]),Produit(int.parse(data[i]["id_produit"]), data[i]["nom_produit"], double.parse(data[i]["prix_produit"]),Laboratoire(int.parse(data[i]["id_laboratoire"]),data[i]["nom_laboratoire"])),int.parse(data[i]["quantite"]),Statut(int.parse(data[i]["id_statut"]),data[i]["designation_statut"]),Motif(int.parse(data[i]["id_motif"]),data[i]["designation_motif"])));
         }
         else {
@@ -55,7 +55,7 @@ class _HistoriqueCmdPageState extends State<HistoriqueCmdPage> {
     var data = json.decode(response.body);
     setState(() {
       for (int i=0;i<data.length;i++) {
-        pharmacies.add(Pharmacie(int.parse(data[i]["id_pharmacie"]),data[i]["nom_pharmacie"]));
+        pharmacies.add(Pharmacie(int.parse(data[i]["id_pharmacie"]),data[i]["nom_pharmacie"],data[i]["adresse_pharmacie"],data[i]["numéro_téléphone_pharmacie"]));
       }
     });
     pharmacie = pharmacies[0].idPharmacie.toString();
